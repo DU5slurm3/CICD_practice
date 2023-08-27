@@ -1,3 +1,4 @@
+kubectl label node ingress-1.s059223.slurm.io node-role.kubernetes.io/ingress=true
 
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
