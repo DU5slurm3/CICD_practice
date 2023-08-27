@@ -1,0 +1,10 @@
+controller:
+  nodeSelector:
+    ingress: "true"
+  hostNetwork: true
+  tolerations:
+    - key: "node-role"
+      operator: "Equal"
+      value: "ingress"
+      effect: "NoSchedule"
+
