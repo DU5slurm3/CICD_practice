@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: test-cert-manager
+  namespace: cert-manager
+spec:
+  secretName: letsencrypt-staging
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: 'my.s056997.edu.slurm.io'
+  dnsNames:
+  - "my.s056997.edu.slurm.io"

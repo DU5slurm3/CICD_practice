@@ -2,5 +2,19 @@ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.1
 kubectl create namespace cert-manager
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
-helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.12.3 --set installCRDs=true
+helm install cert-manager \
+ --namespace cert-manager \
+ --version v1.12.3 \
+ --set ingressShim.defaultIssuerName=letsencrypt-staging \
+ --set ingressShim.defaultIssuerKind=ClusterIssuer \
+ jetstack/cert-manager 
 kubectl apply -f cert-manager-values.yml
+
+## Test cert-manager
+kubectl apply -f cert-manager-test.yaml
+kubectl -n cert-manager describe certificate selfsigned-cert
+kubectl -n cert-manager get certificate selfsigned-cert -o yaml
+kubectl -n cert-manager describe secret selfsigned-cert-tls
+kubectl -n cert-manager get secret selfsigned-cert-tls -o yaml
+kubectl -n cert-manager get issuer -o yaml
+kubectl delete -f cert-manager-test.yaml
