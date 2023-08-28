@@ -6,7 +6,7 @@ curl --request POST "https://gitlab.s059223.edu.slurm.io/api/v4/runners" --form 
 
 ## Change config.toml configuration
 vi /etc/gitlab-runner/config.toml
-
+```
 concurrent = 1
 check_interval = 0
 
@@ -27,3 +27,4 @@ check_interval = 0
     oom_kill_disable = false
     disable_cache = false
     shm_size = 0
+```
