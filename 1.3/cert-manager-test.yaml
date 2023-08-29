@@ -8,6 +8,6 @@ spec:
   issuerRef:
     name: letsencrypt-staging
     kind: ClusterIssuer
-  commonName: 'my.s056997.edu.slurm.io'
+  commonName: '*.s059223.edu.slurm.io'
   dnsNames:
-  - "my.s056997.edu.slurm.io"
+  - "*.s059223.edu.slurm.io"
