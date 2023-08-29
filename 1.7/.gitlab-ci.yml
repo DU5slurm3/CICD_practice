@@ -1,0 +1,91 @@
+stages:
+  - lint
+  - build
+  - test
+  - cleanup
+  - push
+  - deploy
+  - rollout
+  - delete
+
+lint-docker:
+  stage: lint
+  image: hadolint/hadolint:latest-debian
+  script:
+    - hadolint Dockerfile
+
+lint-helm:
+  stage: lint
+  image: centosadmin/kubernetes-helm:3.6.3
+  script:
+    - kubectl config set-cluster k8s --insecure-skip-tls-verify=true --server=$K8S_API_URL
+    - kubectl config set-credentials ci --token=$K8S_CI_TOKEN
+    - kubectl config set-context ci --cluster=k8s --user=ci
+    - kubectl config use-context ci
+    - helm lint .helm
+
+build:
+  stage: build
+  script:
+    - docker build -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG.$CI_PIPELINE_ID .
+
+test:
+  stage: test
+  image:
+    name: docker/compose:1.29.2
+    entrypoint: [""]
+  script:
+    - docker-compose 
+        -p "$CI_PROJECT_NAME"_"$CI_PIPELINE_ID"
+      up
+        --abort-on-container-exit
+        --exit-code-from test
+        --quiet-pull
+
+cleanup:
+  stage: cleanup
+  image:
+    name: docker/compose:1.29.2
+    entrypoint: [""]
+  script:
+    - docker-compose -p "$CI_PROJECT_NAME"_"$CI_PIPELINE_ID" down
+  when: always
+
+push:
+  stage: push
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG.$CI_PIPELINE_ID
+  only:
+    - main
+
+deploy-k8s:
+  stage: deploy
+  image: centosadmin/kubernetes-helm:3.6.3
+  environment:
+    name: production
+  script:
+    - kubectl config set-cluster k8s --insecure-skip-tls-verify=true --server=$K8S_API_URL
+    - kubectl config set-credentials ci --token=$K8S_CI_TOKEN
+    - kubectl config set-context ci --cluster=k8s --user=ci
+    - kubectl config use-context ci
+    - helm upgrade --install $CI_PROJECT_PATH_SLUG .helm
+        --set image=$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
+        --set imageTag=$CI_COMMIT_REF_SLUG.$CI_PIPELINE_ID
+        --set replicas=3
+        --set resources.limits.cpu=200m
+        --set resources.limits.memory=256Mi
+        --set resources.requests.cpu=200m
+        --set resources.requests.memory=256Mi
+        --set service.app_port=8080
+        --set service.port=80
+        --set ingress.host=app.$CI_REGISTRY_USER.edu.slurm.io
+        --set ingress.host=app.$CI_REGISTRY_USER.edu.slurm.io
+        --wait
+        --timeout 300s
+        --atomic
+        --debug
+        --namespace $CI_PROJECT_PATH_SLUG-$CI_ENVIRONMENT_NAME
+  only:
+    - main
