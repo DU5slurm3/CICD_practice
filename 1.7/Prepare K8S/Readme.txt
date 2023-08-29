@@ -9,7 +9,7 @@ K8S_CI_TOKEN
 Name k8s-pull-token с правами read_registry.
 
 # Создаём secret kubernetes
-kubectl create secret docker-registry cicd-gitlab-registry --docker-server registry.slurm.io --docker-email 'student@slurm.io' --docker-username 'gitlab+deploy-token-3996' --docker-password '7zhzc1RMzBCxKwrdwbsM' --namespace s056997-cicd-app-production
+kubectl create secret docker-registry cicd-gitlab-registry --docker-server gitlab.s059223.edu.slurm.io:5555 --docker-email 's059223@slurm.io' --docker-username 'gitlab+deploy-token-1' --docker-password 'Bcxc-txgxywKgiseWdwo' --namespace flask-app-production
 
 # Информация о кластере
 kubectl cluster-info

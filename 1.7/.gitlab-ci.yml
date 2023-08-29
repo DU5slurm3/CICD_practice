@@ -5,8 +5,8 @@ stages:
   - cleanup
   - push
   - deploy
-  - rollout
-  - delete
+#  - rollback
+#  - delete
 
 lint-docker:
   stage: lint
@@ -73,15 +73,14 @@ deploy-k8s:
     - helm upgrade --install $CI_PROJECT_PATH_SLUG .helm
         --set image=$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
         --set imageTag=$CI_COMMIT_REF_SLUG.$CI_PIPELINE_ID
-        --set replicas=3
+        --set replicas=2
         --set resources.limits.cpu=200m
         --set resources.limits.memory=256Mi
         --set resources.requests.cpu=200m
         --set resources.requests.memory=256Mi
-        --set service.app_port=8080
+        --set service.app_port=5000
         --set service.port=80
-        --set ingress.host=app.$CI_REGISTRY_USER.edu.slurm.io
-        --set ingress.host=app.$CI_REGISTRY_USER.edu.slurm.io
+        --set ingress.host=flask.s059223.edu.slurm.io
         --wait
         --timeout 300s
         --atomic

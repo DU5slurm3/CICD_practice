@@ -1,9 +1,9 @@
 description: Generic Helm chart for Kubernetes.
-home: https://slurm.io/
+home: https://gitlab.s059223.edu.slurm.io/
 maintainers:
-- email: a.shvalov@southbridge.ru
-  name: Aleksandr Shvalov
-name: app
+- email: s059223@s059223.edu.slurm.io
+  name: flask
+name: flask-app
 sources:
-- https://gitlab.slurm.io/edu/ci-cd/cicd-app
+- https://gitlab.s059223.edu.slurm.io/flask/flask-app
 version: 1.0.0
