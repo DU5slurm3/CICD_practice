@@ -11,10 +11,7 @@ helm install cert-manager \
 kubectl apply -f cert-manager-values.yml
 
 ## Test cert-manager
-kubectl apply -f cert-manager-test.yaml
-kubectl -n cert-manager describe certificate selfsigned-cert
-kubectl -n cert-manager get certificate selfsigned-cert -o yaml
-kubectl -n cert-manager describe secret selfsigned-cert-tls
-kubectl -n cert-manager get secret selfsigned-cert-tls -o yaml
-kubectl -n cert-manager get issuer -o yaml
-kubectl delete -f cert-manager-test.yaml
+kubectl apply -f /cert-manager-test/.
+kubectl get certificate my-tls -o yaml
+kubectl get secret my-tls -o yaml
+kubectl delete -f /cert-manager-test/.
