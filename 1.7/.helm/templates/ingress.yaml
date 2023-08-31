@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   labels:
@@ -8,13 +8,21 @@ metadata:
     heritage: {{ .Release.Service }}
     component: app
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    kubernetes.io/ingress.class: "{{ .Values.ingress.IngressClass }}"
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.ClusterIssuer }}
   name: {{ .Release.Name }}
 spec:
   rules:
   - host: {{ .Values.ingress.host }}
     http:
       paths:
-      - backend:
-          serviceName: {{ .Release.Name }}
-          servicePort: {{ .Values.service.port }}
+      - pathType: ImplementationSpecific
+        backend:
+          service:
+            name: {{ .Release.Name }}
+            port: 
+              number: {{ .Values.service.port }}
+  tls:
+  - hosts:
+    - {{ .Values.ingress.host }}
+    secretName: {{ .Release.Name }}

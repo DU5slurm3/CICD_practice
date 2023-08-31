@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: {{ .Chart.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    component: app
+  name: {{ .Values.redis.fullname }}
+spec:
+  serviceName: {{ .Values.redis.fullname }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.redis.fullname }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.redis.fullname }}
+        name: {{ .Values.redis.fullname }}
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: {{ .Values.redis.fullname }}
+        image: {{ .Values.redis.image }}
+        args: ["--appendonly", "yes"]
+        ports:
+          - name: {{ .Values.redis.fullname }}
+            containerPort: {{ .Values.redis.port }}
+        volumeMounts:
+          - name: lv-storage
+            mountPath: /data
+        env:
+            - name: ALLOW_EMPTY_PASSWORD
+              value: "yes"
+        resources:
+{{ toYaml .Values.redis.resources | indent 12 }}
+      volumes:
+        - name: lv-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.redis.persistence.VolumeName }}-{{ .Values.redis.fullname }}

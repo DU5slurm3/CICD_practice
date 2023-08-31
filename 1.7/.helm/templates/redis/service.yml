@@ -1,0 +1,16 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Values.redis.fullname }}
+  labels:
+    app: {{ .Values.redis.fullname }}
+spec:
+  clusterIP: None
+  ports:
+    - name: redis-port
+      protocol: TCP
+      port: {{ .Values.redis.port }}
+      targetPort: {{ .Values.redis.port }}
+  selector:
+    app: {{ .Values.redis.fullname }}

@@ -76,3 +76,4 @@ spec:
       terminationGracePeriodSeconds: 20
       imagePullSecrets:
         - name: {{ .Values.imagePullSecret }}
+

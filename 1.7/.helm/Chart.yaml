@@ -1,9 +1,10 @@
+apiVersion: v2
 description: Generic Helm chart for Kubernetes.
 home: https://gitlab.s059223.edu.slurm.io/
 maintainers:
 - email: s059223@s059223.edu.slurm.io
-  name: flask
-name: flask-app
+  name: s059223
+name: application
 sources:
-- https://gitlab.s059223.edu.slurm.io/flask/flask-app
+- https://gitlab.s059223.edu.slurm.io/s059223/application
 version: 1.0.0

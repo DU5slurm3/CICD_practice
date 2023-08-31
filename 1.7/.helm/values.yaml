@@ -1,6 +1,6 @@
 # This is a YAML-formatted file.
 
-image: gitlab.s059223.edu.slurm.io/flask/flask-app
+image: gitlab.s059223.edu.slurm.io:5555/s059223/application
 imageTag: master.1
 imagePullSecret: cicd-gitlab-registry
 
@@ -23,3 +23,24 @@ service:
 
 ingress:
   host: flask.s059223.edu.slurm.io
+  IngressClass: nginx
+  ClusterIssuer: letsencrypt-staging
+
+redis:
+  image: redis:7.2.0-alpine3.18
+  fullname: redis
+  port: 6379
+  usePassword: false
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  persistence:
+    enabled: true
+    storageClassName: local-storage
+    VolumeName: local-volume
+    accessMode: ReadWriteOnce
+    size: 1Gi

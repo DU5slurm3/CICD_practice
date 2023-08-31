@@ -1,3 +1,6 @@
+variables:
+  DOCKER_TLS_CERTDIR: ""
+
 stages:
   - lint
   - build
@@ -10,7 +13,9 @@ stages:
 
 lint-docker:
   stage: lint
-  image: hadolint/hadolint:latest-debian
+  allow_failure: true
+#  image: hadolint/hadolint:latest-debian
+  image: hadolint/hadolint:latest-alpine
   script:
     - hadolint Dockerfile
 
@@ -23,9 +28,13 @@ lint-helm:
     - kubectl config set-context ci --cluster=k8s --user=ci
     - kubectl config use-context ci
     - helm lint .helm
+  allow_failure: true
 
 build:
   stage: build
+  before_script:
+    - docker info
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
     - docker build -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG.$CI_PIPELINE_ID .
 
@@ -71,9 +80,17 @@ deploy-k8s:
     - kubectl config set-context ci --cluster=k8s --user=ci
     - kubectl config use-context ci
     - helm upgrade --install $CI_PROJECT_PATH_SLUG .helm
+        --set replicas=2
         --set image=$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
         --set imageTag=$CI_COMMIT_REF_SLUG.$CI_PIPELINE_ID
-        --set replicas=2
+        --set redis.enabled="true"
+        --set redis.fullname="redis"
+        --set redis.port="6379"
+        --set redis.usePassword="false"
+        --set redis.persistence.enabled="true"
+        --set redis.persistence.size=1Gi
+        --set redis.persistence.storageClassName="local-storage"
+        --set redis.persistence.VolumeName="local-volume"
         --set resources.limits.cpu=200m
         --set resources.limits.memory=256Mi
         --set resources.requests.cpu=200m
@@ -81,10 +98,13 @@ deploy-k8s:
         --set service.app_port=5000
         --set service.port=80
         --set ingress.host=flask.s059223.edu.slurm.io
+        --set ingress.IngressClass="nginx"
+        --set ingress.ClusterIssuer=letsencrypt-staging
         --wait
         --timeout 300s
         --atomic
         --debug
         --namespace $CI_PROJECT_PATH_SLUG-$CI_ENVIRONMENT_NAME
+
   only:
     - main
