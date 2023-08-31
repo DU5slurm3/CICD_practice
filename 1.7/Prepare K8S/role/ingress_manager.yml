@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ingress-manager-binding
+  namespace: s059223-application-production
+subjects:
+- kind: ServiceAccount
+  name: s059223-application-production
+  namespace: s059223-application-production
+roleRef:
+  kind: Role
+  name: ingress-manager
+  apiGroup: rbac.authorization.k8s.io
+

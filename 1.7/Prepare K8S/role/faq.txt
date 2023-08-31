@@ -1,0 +1,3 @@
+kubectl apply -f role.yml 
+kubectl apply -f ingress_manager.yml 
+
