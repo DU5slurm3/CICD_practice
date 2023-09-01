@@ -7,8 +7,10 @@ stages:
   - test
   - cleanup
   - push
+  - release
   - deploy
-#  - rollback
+  - rollback
+
 #  - delete
 
 lint-docker:
@@ -69,6 +71,17 @@ push:
   only:
     - main
 
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:v0.1.0
+  script:
+    - |
+      release-cli create --name "Release $CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG.$CI_PIPELINE_ID" --tag-name $CI_COMMIT_REF_SLUG.$CI_PIPELINE_ID --description "Release description changelog" 
+      
+#--assets-link "{\"name\":\"assets\",\"url\":\"https://gitlab.s059223.edu.slurm.io/s059223/application/-/releases",\"link_type\":\"other\"}"
+  only:
+    - main
+
 deploy-k8s:
   stage: deploy
   image: centosadmin/kubernetes-helm:3.6.3
@@ -108,3 +121,21 @@ deploy-k8s:
 
   only:
     - main
+
+rollback:
+  stage: rollback
+  image: centosadmin/kubernetes-helm:3.6.3
+  environment:
+    name: production
+  script:
+    - kubectl config set-cluster k8s --insecure-skip-tls-verify=true --server=$K8S_API_URL
+    - kubectl config set-credentials ci --token=$K8S_CI_TOKEN
+    - kubectl config set-context ci --cluster=k8s --user=ci
+    - kubectl config use-context ci
+    - helm rollback $CI_PROJECT_PATH_SLUG 0
+        --wait
+        --timeout 300s
+        --debug
+        --namespace $CI_PROJECT_PATH_SLUG-$CI_ENVIRONMENT_NAME
+
+  when: manual
